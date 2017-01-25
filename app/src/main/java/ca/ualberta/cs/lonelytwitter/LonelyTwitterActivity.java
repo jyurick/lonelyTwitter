@@ -1,11 +1,14 @@
 package ca.ualberta.cs.lonelytwitter;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -23,12 +26,18 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class LonelyTwitterActivity extends Activity {
 
     private static final String FILENAME = "file.sav";
     private EditText bodyText;
     private ListView oldTweetsList;
+
+    private ArrayList<Tweet> tweetList;
+    private ArrayAdapter<Tweet> adapter;
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -45,33 +54,47 @@ public class LonelyTwitterActivity extends Activity {
 
         bodyText = (EditText) findViewById(R.id.body);
         Button saveButton = (Button) findViewById(R.id.save);
+        Button clearButton = (Button) findViewById(R.id.clear);
         oldTweetsList = (ListView) findViewById(R.id.oldTweetsList);
 
-
-        try {
-            Tweet tweet = new normalTweet("First tweet");
-            tweet.setMessage("Actually this will be my first tweet!");
-            importantTweet importantTweet = new importantTweet("This tweet is extra important");
-            normalTweet normalTweet = new normalTweet("Another normal tweet");
-
-            ArrayList<Tweet> arrayList = new ArrayList<Tweet>();
-            arrayList.add(tweet);
-            arrayList.add((Tweet) importantTweet);
-            arrayList.add((Tweet) normalTweet);
-        } catch (TweetTooLongException e) {
-            e.printStackTrace();
-        }
 
         saveButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
                 setResult(RESULT_OK);
                 String text = bodyText.getText().toString();
-                saveInFile(text, new Date(System.currentTimeMillis()));
+
+                Tweet tweet = null;
+                try {
+                    tweet = new normalTweet(text);
+                } catch (TweetTooLongException e) {
+                    e.printStackTrace();
+                }
+                tweetList.add(tweet);
+
+                adapter.notifyDataSetChanged();
+
+                saveInFile();
                 finish();
 
             }
         });
+
+        clearButton.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                tweetList.clear();
+
+                adapter.notifyDataSetChanged();
+
+                saveInFile();
+                finish();
+
+            }
+        });
+
+
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
@@ -83,49 +106,56 @@ public class LonelyTwitterActivity extends Activity {
         super.onStart();// ATTENTION: This was auto-generated to implement the App Indexing API.
 // See https://g.co/AppIndexing/AndroidStudio for more information.
         client.connect();
-        String[] tweets = loadFromFile();
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                R.layout.list_item, tweets);
+        loadFromFile();
+
+        adapter = new ArrayAdapter<Tweet>(this,
+                R.layout.list_item, tweetList);
         oldTweetsList.setAdapter(adapter);
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         AppIndex.AppIndexApi.start(client, getIndexApiAction());
     }
 
-    private String[] loadFromFile() {
+    private void loadFromFile() {
         ArrayList<String> tweets = new ArrayList<String>();
         try {
             FileInputStream fis = openFileInput(FILENAME);
             BufferedReader in = new BufferedReader(new InputStreamReader(fis));
-            String line = in.readLine();
-            while (line != null) {
-                tweets.add(line);
-                line = in.readLine();
-            }
+
+            Gson gson = new Gson();
+
+            Type listType = new TypeToken<ArrayList<normalTweet>>(){}.getType();
+
+            tweetList = gson.fromJson(in, listType);
 
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            tweetList = new ArrayList<Tweet>();
+            //new RuntimeException();
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            new RuntimeException();
         }
-        return tweets.toArray(new String[tweets.size()]);
+
     }
 
-    private void saveInFile(String text, Date date) {
+    private void saveInFile() {
         try {
             FileOutputStream fos = openFileOutput(FILENAME,
-                    Context.MODE_APPEND);
-            fos.write(new String(date.toString() + " | " + text)
-                    .getBytes());
+                    Context.MODE_PRIVATE);
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fos));
+
+            Gson gson = new Gson();
+            gson.toJson(tweetList, out);
+            out.flush();
+
             fos.close();
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException();
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new RuntimeException();
         }
     }
 
