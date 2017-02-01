@@ -5,6 +5,8 @@ import java.util.Date;
 
 /**
  * Created by jyurick on 1/17/17.
+ *
+ * Tweet class is a super class that implements Tweetable.
  */
 
 public abstract class Tweet implements Tweetable {
