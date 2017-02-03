@@ -14,16 +14,31 @@ public abstract class Tweet implements Tweetable {
     private String message;
     private ArrayList<Mood> moodList = new ArrayList<Mood>();
 
+    /**
+     * Constructor for Tweet class
+     * @param date
+     * @param message
+     * @throws TweetTooLongException when message is > 140 characters.
+     */
     public Tweet(Date date, String message) throws TweetTooLongException {
         this.date = date;
         this.setMessage(message);
     }
 
+    /**
+     * Constructor for Tweet class. Date of Tweet is set to current date and time.
+     * @param message
+     * @throws TweetTooLongException when message is > 140 characters.
+     */
     public Tweet(String message) throws TweetTooLongException {
         this.setMessage(message);
         this.date = new Date(); //current time and date
     }
 
+    /**
+     *
+     * @param String representing the mood to be added. Moods available are "happy" and "sad"
+     */
     public void addMood (String mood) {
         if (mood.equals("happy")) {
             this.moodList.add(new happyMood());
@@ -56,6 +71,10 @@ public abstract class Tweet implements Tweetable {
         }
     }
 
+    /**
+     *
+     * @return String representing Tweet with user friendly formatting.
+     */
     @Override
     public String toString() {
         return date.toString() + " | " + message;

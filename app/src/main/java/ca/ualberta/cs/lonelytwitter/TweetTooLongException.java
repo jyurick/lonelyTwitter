@@ -1,7 +1,8 @@
 package ca.ualberta.cs.lonelytwitter;
 
 /**
- * Created by jyurick on 1/17/17.
+ * Exception used in Tweet class. This exception is meant to be thrown when the
+ * Tweet message is too long (over 140 characters).
  */
 
 public class TweetTooLongException extends Exception {

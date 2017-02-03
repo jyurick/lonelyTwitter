@@ -3,7 +3,7 @@ package ca.ualberta.cs.lonelytwitter;
 import java.util.Date;
 
 /**
- * Created by jyurick on 1/17/17.
+ * Interface used for Tweet class
  */
 
 public interface Tweetable {

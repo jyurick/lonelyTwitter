@@ -128,6 +128,9 @@ public class LonelyTwitterActivity extends Activity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
+    /**
+     * Called when the application is first started.
+     */
     @Override
     protected void onStart() {
         // TODO Auto-generated method stub
@@ -230,6 +233,9 @@ public class LonelyTwitterActivity extends Activity {
                 .build();
     }
 
+    /**
+     * Called when the activity is stopped.
+     */
     @Override
     public void onStop() {
         super.onStop();
