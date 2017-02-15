@@ -16,14 +16,7 @@ public class TweetListTest extends ActivityInstrumentationTestCase2 {
         super(LonelyTwitterActivity.class);
     }
 
-    public void testAddTweet() {
-        TweetList tweets = new TweetList();
-        Tweet tweet = new NormalTweet("teste tweet");
 
-        tweets.add(tweet);
-
-        assertTrue(tweets.hasTweet(tweet));
-    }
 
     public void testAddTweetException() {
         TweetList copy = new TweetList();
@@ -31,7 +24,10 @@ public class TweetListTest extends ActivityInstrumentationTestCase2 {
         Tweet tweet2 = new NormalTweet("test2");
 
         copy.addTweet(tweet);
-        copy.addTweet(tweet);
+        try {
+            copy.addTweet(tweet);
+        } catch (IllegalArgumentException e){
+        }
         copy.delete(tweet);
         copy.addTweet(tweet2);
 
